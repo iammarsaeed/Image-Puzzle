@@ -54,7 +54,7 @@ class ViewController: UICollectionViewController {
     }
     
     func useStaticImage() {
-        let staticImageName = "Charuzard"  // Assuming "Charizard" is the name of your static image
+        let staticImageName = "Charuzard"
         guard let staticImage = UIImage(named: staticImageName) else {
             print("Static image named '\(staticImageName)' not found")
             return
@@ -135,9 +135,8 @@ extension ViewController : UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let collectionViewWidth = collectionView.bounds.width
-        var customCollectionWidth: CGFloat!
-        customCollectionWidth = collectionViewWidth / 3 - 10
-       
+        let customCollectionWidth = collectionViewWidth / 3 - 10
+        
         return CGSize(width: customCollectionWidth, height: customCollectionWidth)
     }
     
@@ -148,6 +147,12 @@ extension ViewController : UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 0
     }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
+
 }
 
 extension ViewController: UICollectionViewDragDelegate {
@@ -167,11 +172,6 @@ extension ViewController: UICollectionViewDropDelegate {
         if puzzle[index].unsolvedImages == puzzle[index].solvedImages {
             Alert.showSolvedPuzzleAlert(on: self)
             collectionView.dragInteractionEnabled = false
-            if index == puzzle.count - 1 {
-                navigationItem.rightBarButtonItem?.isEnabled = false
-            } else {
-                navigationItem.rightBarButtonItem?.isEnabled = true
-            }
         }
     }
     
