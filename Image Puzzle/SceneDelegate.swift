@@ -2,7 +2,7 @@
 //  SceneDelegate.swift
 //  Image Puzzle
 //
-//  Created by Arkhitech on 09/06/2024.
+//  Created by Ammar on 09/06/2024.
 //
 
 import UIKit

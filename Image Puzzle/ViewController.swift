@@ -11,7 +11,7 @@ class ViewController: UICollectionViewController {
     
     var puzzle: [Puzzle] = []
     var index: Int = 0
-    
+    var imageUrl: URL?
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -23,7 +23,11 @@ class ViewController: UICollectionViewController {
     }
     
     func downloadAndSliceImage() {
-        let imageUrl = URL(string: "https://picsum.photos/1024")!
+        guard let imageUrl = self.imageUrl else {
+            print("Image URL is nil")
+            useStaticImage()
+            return
+        }
         let task = URLSession.shared.dataTask(with: imageUrl) { data, response, error in
             guard let data = data, error == nil else {
                 print("Failed to download image")

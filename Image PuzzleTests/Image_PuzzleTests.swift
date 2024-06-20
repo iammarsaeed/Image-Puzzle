@@ -2,35 +2,93 @@
 //  Image_PuzzleTests.swift
 //  Image PuzzleTests
 //
-//  Created by Arkhitech on 09/06/2024.
+//  Created by Ammar on 09/06/2024.
 //
-
+import UIKit
 import XCTest
 @testable import Image_Puzzle
 
-final class Image_PuzzleTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+class ViewControllerTests: XCTestCase {
+    
+    var sut: ViewController!
+    
+    override func setUp() {
+        super.setUp()
+        let layout = UICollectionViewFlowLayout()
+        sut = ViewController(collectionViewLayout: layout)
+        sut.loadViewIfNeeded()
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+        
+    func testDownloadAndSliceImage_Successful() {
+        let expectation = self.expectation(description: "Download and slice image successful")
+        
+        self.sut.puzzle.removeAll()
+        
+        sut.downloadAndSliceImage()
+        
+        DispatchQueue.main.async {
+            XCTAssertEqual(self.sut.puzzle.count, 1)
+            expectation.fulfill()
         }
+        
+        waitForExpectations(timeout: 10.0, handler: nil)
     }
 
+    
+    func testDownloadAndSliceImage_FallbackToStaticImage() {
+        let expectation = self.expectation(description: "Fallback to static image")
+        
+        self.sut.puzzle.removeAll()
+        
+        self.sut.imageUrl = URL(string: "invalid_url")!
+        
+        sut.downloadAndSliceImage()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            XCTAssertEqual(self.sut.puzzle.count, 1, "Expected one puzzle")
+            XCTAssertEqual(self.sut.puzzle[0].unsolvedImages.count, 9, "Expected 9 unsolved images")
+            XCTAssertEqual(self.sut.puzzle[0].solvedImages.count, 9, "Expected 9 solved images")
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 10.0, handler: { error in
+            if let error = error {
+                XCTFail("Error: \(error)")
+            }
+            XCTAssertEqual(self.sut.puzzle.count, 1, "Expected one puzzle only")
+        })
+    }
+
+
+    
+    func testCollectionView_NumberOfSections() {
+        let numberOfSections = sut.numberOfSections(in: sut.collectionView)
+        XCTAssertEqual(numberOfSections, 1)
+    }
+    
+    func testCollectionView_NumberOfItemsInSection() {
+        let itemsCount = sut.collectionView(sut.collectionView, numberOfItemsInSection: 0)
+        XCTAssertEqual(itemsCount, 9)
+    }
+    
+    func testSliceImage() {
+        let image = UIImage(named: "Charuzard")!
+        let slices = sut.sliceImage(image: image, into: 3)
+        
+        XCTAssertEqual(slices.count, 9)
+    }
+    
+    func testSaveImageToDocuments() {
+        let image = UIImage(named: "Charuzard")!
+        let filePath = sut.saveImageToDocuments(image: image)
+        
+        XCTAssertNotNil(filePath)
+    }
+    
 }
